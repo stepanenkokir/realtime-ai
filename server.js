@@ -16,6 +16,8 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+const currentPassword = process.env.PASSWORD || 10000 * Math.random();
+
 // Middleware
 app.use(express.json());
 app.use(cors());
@@ -25,6 +27,10 @@ app.use(express.static(path.join(__dirname, "./client")));
 
 // Session token endpoint
 app.get("/session-token", async (req, res) => {
+  const { passcode } = req.query;
+  if (!passcode || passcode !== currentPassword) {
+    return res.status(401).json({ error: "Authentification failed" });
+  }
   try {
     console.log("Requesting session token from OpenAI...");
 
@@ -53,6 +59,7 @@ app.get("/session-token", async (req, res) => {
     });
 
     if (!resp.ok) {
+      console.log(`OpenAI API error: ${resp.status} ${resp.statusText}`);
       throw new Error(`OpenAI API error: ${resp.status} ${resp.statusText}`);
     }
 
@@ -74,32 +81,37 @@ app.get("/health", (req, res) => {
 });
 
 // Create HTTPS server with certificates
-let server = app;
-// try {
-//   // Load certificates
-//   const privateKey = fs.readFileSync(
-//     path.join(__dirname, "./cert", "localhost-key.pem"),
-//     "utf8"
-//   );
-//   const certificate = fs.readFileSync(
-//     path.join(__dirname, "./cert", "localhost-cert.pem"),
-//     "utf8"
-//   );
-//   const credentials = { key: privateKey, cert: certificate };
+const devHTTPS = process.env.DEV_HTTPS || 0;
+let server;
+if (devHTTPS == 1) {
+  try {
+    // Load certificates
+    const privateKey = fs.readFileSync(
+      path.join(__dirname, "./cert", "localhost-key.pem"),
+      "utf8"
+    );
+    const certificate = fs.readFileSync(
+      path.join(__dirname, "./cert", "localhost-cert.pem"),
+      "utf8"
+    );
+    const credentials = { key: privateKey, cert: certificate };
 
-//   // Create HTTPS server
-//   server = https.createServer(credentials, app);
-//   console.log("HTTPS server configured");
-// } catch (error) {
-//   console.warn("HTTPS certificates not found, falling back to HTTP");
-//   server = app;
-// }
+    // Create HTTPS server
+    server = https.createServer(credentials, app);
+    console.log("HTTPS server configured");
+  } catch (error) {
+    console.warn("HTTPS certificates not found, falling back to HTTP");
+    server = app;
+  }
+} else {
+  server = app;
+}
 
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`Access the app at: https://localhost:${PORT}`);
+  console.log(`Access the app at: localhost:${PORT}`);
 
   if (!process.env.OPENAI_API_KEY) {
     console.error("⚠️  OPENAI_API_KEY not found in environment variables");

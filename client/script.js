@@ -73,18 +73,29 @@ function visualizeMicAudio(stream) {
 }
 
 // API functions
-async function getToken() {
-  const response = await fetch("/session-token", {
+async function getToken(passcode) {
+  const response = await fetch(`/session-token?passcode=${passcode}`, {
     method: "GET",
   });
+  if (response.status !== 200) {
+    return null;
+  }
   return await response.json();
 }
 
 async function startSession() {
   try {
     showLoader("Получаю токен...");
-    const data = await getToken();
+    const passcode = document.getElementById("passwd").value;
+    const data = await getToken(passcode);
+
+    if (!data) {
+      hideLoader();
+      updateStatus("Нет доступа");
+    }
+
     const EPHEMERAL_KEY = data.client_secret.value;
+
     const model = data.model;
 
     showLoader("Устанавливаю соединение...");

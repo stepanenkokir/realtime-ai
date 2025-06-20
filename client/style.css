@@ -1,0 +1,355 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  height: 100vh;
+  overflow: hidden; /* Важно, чтобы body не скроллился */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.container {
+  text-align: center;
+  width: 100%;
+  max-width: 500px;
+  padding: 20px;
+  /* margin-top: 20px; */ /* Убрал, так как container будет занимать большую часть высоты */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between; /* Распределяем пространство между элементами */
+  height: calc(
+    100vh - 100px
+  ); /* Учитываем статус-бар и небольшой запас сверху/снизу */
+  overflow: hidden; /* Чтобы содержимое не выходило за границы */
+  padding-bottom: 100px; /* Отступ снизу для input-container */
+}
+
+.status-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  padding: 10px 20px;
+  font-size: 14px;
+  z-index: 100;
+  text-align: center;
+}
+
+.main-button {
+  width: min(70vw, 300px);
+  height: min(70vw, 300px);
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+  color: white;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-top: 20px; /* Отступ сверху для кнопки */
+  margin-bottom: 20px; /* Отступ снизу для кнопки */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0; /* Не сжимать кнопку */
+}
+
+.main-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+.main-button:active {
+  transform: scale(0.95);
+}
+
+.main-button.recording {
+  background: linear-gradient(45deg, #ff4757, #ff3838);
+  animation: pulse 2s infinite;
+}
+
+.main-button.stop {
+  background: linear-gradient(45deg, #ff4757, #c44569);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3),
+      0 0 0 0 rgba(255, 71, 87, 0.7);
+  }
+  70% {
+    box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3),
+      0 0 0 20px rgba(255, 71, 87, 0);
+  }
+  100% {
+    box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3), 0 0 0 0 rgba(255, 71, 87, 0);
+  }
+}
+
+.button-text {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 10px;
+}
+
+.visual-container {
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: 80%;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 1;
+  transition: all 0.3s ease;
+}
+
+.visual-section {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 8px;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.visual-section.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.audio-canvas {
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+#transcriptSection {
+  flex-grow: 1;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#transcriptOutput {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: white;
+  word-wrap: break-word;
+}
+
+.user-message {
+  background: rgba(0, 123, 255, 0.8);
+  align-self: flex-end;
+  margin-left: 30%;
+}
+
+.ai-message {
+  background: rgba(108, 117, 125, 0.8);
+  align-self: flex-start;
+  margin-right: 30%;
+}
+
+/* Стили для блока ввода текста */
+.input-container {
+  width: calc(100% - 40px); /* Учитываем padding container'а */
+  display: flex;
+  gap: 10px;
+  position: fixed; /* Закрепляем внизу экрана */
+  bottom: 20px; /* Отступ от нижнего края */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 101; /* Выше статус-бара */
+  max-width: 460px; /* Чтобы не растягивался слишком сильно на больших экранах */
+}
+
+.input-container input,
+.input-container button {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+#textInput {
+  flex-grow: 1;
+  padding: 12px 15px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+#textInput::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+#textInput:focus {
+  border-color: #ffd93d;
+}
+
+#sendButton {
+  flex-shrink: 0; /* Не сжимать кнопку */
+  padding: 12px 20px;
+  border-radius: 25px;
+  border: none;
+  background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+#sendButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+#sendButton:active {
+  transform: translateY(0);
+}
+
+.loader {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(20px);
+  padding: 30px 40px;
+  border-radius: 20px;
+  z-index: 200;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.loader.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top: 3px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 15px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Адаптация под экран смартфона */
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+    height: calc(100vh - 60px); /* Учитываем статус-бар и input-container */
+    padding-bottom: 60px; /* Отступ снизу для input-container */
+  }
+
+  .main-button {
+    font-size: 16px;
+    width: min(80vw, 250px);
+    height: min(80vw, 250px);
+    margin-top: 15px;
+    margin-bottom: 15px;
+  }
+
+  .button-text {
+    margin-bottom: 5px;
+  }
+
+  .visual-container {
+    height: 60px;
+    bottom: 15px;
+  }
+
+  .visual-section {
+    padding: 6px;
+  }
+
+  .audio-canvas {
+    height: 30px;
+  }
+
+  #transcriptSection {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+
+  #transcriptOutput {
+    font-size: 14px;
+  }
+
+  .input-container {
+    width: calc(100% - 30px); /* Учитываем padding container'а на мобильных */
+    bottom: 15px;
+    max-width: unset; /* Отключаем max-width для мобильных */
+  }
+
+  #textInput,
+  #sendButton {
+    font-size: 14px;
+    padding: 10px 15px;
+  }
+
+  .status-bar {
+    padding: 8px 15px;
+    font-size: 12px;
+  }
+}

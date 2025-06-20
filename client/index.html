@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>Voice AI Assistant</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="status-bar">
+      <div id="status">Готов к работе</div>
+    </div>
+
+    <div class="container">
+      <button id="startButton" class="main-button">
+        <span id="btnTxt" class="button-text">Начать</span>
+        <div class="visual-container">
+          <div id="micVisualSection" class="visual-section">
+            <canvas
+              id="micCanvas"
+              class="audio-canvas"
+              width="300"
+              height="60"
+            ></canvas>
+          </div>
+        </div>
+      </button>
+
+      <div id="transcriptSection">
+        <div id="transcriptOutput"></div>
+      </div>
+
+      <div class="input-container">
+        <input
+          disabled
+          type="text"
+          id="textInput"
+          placeholder="Введите ваше сообщение..."
+        />
+        <button disabled id="sendButton">Отправить</button>
+      </div>
+    </div>
+
+    <div id="loader" class="loader">
+      <div class="loader-spinner"></div>
+      <div id="loaderText">Загрузка...</div>
+    </div>
+    <audio id="remoteAudio" autoplay></audio>
+    <script src="script.js"></script>
+  </body>
+</html>

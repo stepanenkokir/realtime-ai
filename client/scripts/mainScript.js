@@ -1,76 +1,37 @@
 let isSessionActive = false;
 let peerConnection = null;
 let micStream = null;
-let micAnalyser = null;
-let audioContext = null;
-let micAnimId = null;
+
+// Инициализируем server logger
+const serverLogger = new ServerLogger();
+
+// Перехватываем все логи и отправляем на сервер
+const originalConsoleLog = console.log;
+const originalConsoleError = console.error;
+
+console.log = (...args) => {
+  originalConsoleLog.apply(console, args);
+  serverLogger.log("LOG", args.join(" "));
+};
+
+console.error = (...args) => {
+  originalConsoleError.apply(console, args);
+  serverLogger.log("ERROR", args.join(" "));
+};
+
+// Добавляем специальные методы для отладки аудио
+function logAudioDebug(message, data) {
+  console.log(`[AUDIO] ${message}`, data);
+  serverLogger.log("AUDIO", message, data);
+}
+
+function logWebRTCDebug(message, data) {
+  console.log(`[WebRTC] ${message}`, data);
+  serverLogger.log("WEBRTC", message, data);
+}
 
 // Переменная для хранения полного транскрипта (опционально, если нужно сохранять всю беседу)
 let fullTranscript = [];
-// Получаем ссылку на элемент, куда будем выводить транскрипт
-const transcriptOutputElement = document.getElementById("transcriptOutput");
-
-// Utility functions
-function showLoader(text = "Загрузка...") {
-  document.getElementById("loaderText").textContent = text;
-  document.getElementById("loader").classList.add("show");
-}
-
-function hideLoader() {
-  document.getElementById("loader").classList.remove("show");
-}
-
-function updateStatus(text) {
-  document.getElementById("status").textContent = text;
-}
-
-function ensureAudioContext() {
-  if (!audioContext || audioContext.state === "closed") {
-    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  }
-}
-
-// Audio visualization
-function visualizeMicAudio(stream) {
-  const canvas = document.getElementById("micCanvas");
-  const ctx = canvas.getContext("2d");
-
-  ensureAudioContext();
-
-  const source = audioContext.createMediaStreamSource(stream);
-  micAnalyser = audioContext.createAnalyser();
-  source.connect(micAnalyser);
-
-  micAnalyser.fftSize = 256;
-  const bufferLength = micAnalyser.frequencyBinCount;
-  const dataArray = new Uint8Array(bufferLength);
-
-  function draw() {
-    if (!isSessionActive) {
-      cancelAnimationFrame(micAnimId);
-      return;
-    }
-
-    micAnimId = requestAnimationFrame(draw);
-    micAnalyser.getByteFrequencyData(dataArray);
-
-    ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const barWidth = (canvas.width / bufferLength) * 2;
-    let x = 0;
-
-    for (let i = 0; i < bufferLength; i++) {
-      const barHeight = (dataArray[i] / 255) * canvas.height;
-
-      const hue = (i / bufferLength) * 60 + 200; // Blue to cyan
-      ctx.fillStyle = `hsla(${hue}, 70%, 60%, 0.8)`;
-      ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-      x += barWidth + 1;
-    }
-  }
-  draw();
-}
 
 // API functions
 async function getToken(passcode) {
@@ -114,8 +75,6 @@ async function startSession() {
     };
 
     // Set up remote audio
-    const audioElement = document.getElementById("remoteAudio");
-
     peerConnection.ontrack = (e) => {
       if (e.streams && e.streams[0]) {
         const audioElement = document.getElementById("remoteAudio");
@@ -135,32 +94,16 @@ async function startSession() {
     const dataChannel = peerConnection.createDataChannel("oai-events");
     dataChannel.addEventListener("message", (e) => {
       const rr = JSON.parse(e.data);
-      //  console.log(rr);
       // Request
       if (rr.type === "conversation.item.input_audio_transcription.completed") {
-        // console.log("------------------------------------------------------");
-        console.log("REQUEST: ", rr.transcript);
-        //  console.log("------------------------------------------------------");
         fullTranscript.push({ sender: "user", text: rr.transcript });
-        renderTranscript();
-        // fullTranscript += `<span>Вы: ${rr.transcript}</span>`; // Добавляем к полному транскрипту
-        // transcriptOutputElement.textContent = fullTranscript; // Обновляем отображение
-        // transcriptOutputElement.scrollTop =
-        //   transcriptOutputElement.scrollHeight; // Прокручиваем вниз
+        renderTranscript(fullTranscript);
       }
 
       // Response
       if (rr.type === "response.audio_transcript.done") {
-        // console.log("======================================================");
-        console.log("Response: ", rr.transcript);
-        // console.log("======================================================");
-
         fullTranscript.push({ sender: "ai", text: rr.transcript });
-        renderTranscript();
-        // fullTranscript += `<span>AI: ${rr.transcript}</span>`;
-        // transcriptOutputElement.textContent = fullTranscript;
-        // transcriptOutputElement.scrollTop =
-        //   transcriptOutputElement.scrollHeight;
+        renderTranscript(fullTranscript);
       }
     });
 
@@ -209,20 +152,7 @@ async function startSession() {
   }
 }
 
-function renderTranscript() {
-  transcriptOutputElement.innerHTML = "";
-  fullTranscript.forEach(({ sender, text }) => {
-    const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${
-      sender === "user" ? "user-message" : "ai-message"
-    }`;
-    messageDiv.textContent = text;
-    transcriptOutputElement.appendChild(messageDiv);
-  });
-  transcriptOutputElement.scrollTop = transcriptOutputElement.scrollHeight;
-}
-
-function stopSession() {
+async function stopSession() {
   isSessionActive = false;
 
   if (peerConnection) {
@@ -237,11 +167,7 @@ function stopSession() {
     micStream = null;
   }
 
-  if (audioContext) {
-    audioContext.close();
-  }
-
-  cancelAnimationFrame(micAnimId);
+  await closeAudioContext();
 
   // Reset UI
   const startButton = document.getElementById("startButton");

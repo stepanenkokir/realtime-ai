@@ -230,7 +230,11 @@ function stopSession() {
   }
 
   if (micStream) {
-    micStream.getTracks().forEach((track) => track.stop());
+    micStream.getTracks().forEach((track) => {
+      track.stop();
+      track.enabled = false; // Explicitly disable
+    });
+    micStream = null;
   }
 
   if (audioContext) {
@@ -252,6 +256,14 @@ function stopSession() {
   // Clear canvases
   const micCanvas = document.getElementById("micCanvas");
   micCanvas.getContext("2d").clearRect(0, 0, micCanvas.width, micCanvas.height);
+
+  // Force release microphone permissions (iOS workaround)
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then((stream) => {
+      stream.getTracks().forEach((track) => track.stop());
+    })
+    .catch(() => {}); // Ignore errors, just ensure tracks are stopped
 }
 
 // Event listeners

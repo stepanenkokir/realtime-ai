@@ -22,6 +22,8 @@ export function setupTelegramRoutes(app) {
         });
       }
 
+      console.log("InitData:");
+      console.log(initData);
       const verifiedData = verifyTelegramInitData(initData, botToken);
 
       if (!verifiedData) {

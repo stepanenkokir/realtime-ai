@@ -12,25 +12,22 @@
   <body>
     <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
     <div class="status-bar">
+      <button id="startDialog" class="main-button">🎤</button>
+      <div class="visual-container">
+        <div id="micVisualSection" class="visual-section">
+          <canvas
+            id="micCanvas"
+            class="audio-canvas"
+            width="300"
+            height="60"
+          ></canvas>
+        </div>
+      </div>
       <div id="status">Готов к работе</div>
       <input id="passwd" />
     </div>
 
     <div class="container">
-      <button id="startButton" class="main-button">
-        <span id="btnTxt" class="button-text">Начать</span>
-        <div class="visual-container">
-          <div id="micVisualSection" class="visual-section">
-            <canvas
-              id="micCanvas"
-              class="audio-canvas"
-              width="300"
-              height="60"
-            ></canvas>
-          </div>
-        </div>
-      </button>
-
       <div id="transcriptSection">
         <div id="transcriptOutput"></div>
       </div>

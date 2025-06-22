@@ -20,7 +20,6 @@ body {
 .container {
   text-align: center;
   width: 100%;
-  max-width: 500px;
   padding: 20px;
   /* margin-top: 20px; */ /* Убрал, так как container будет занимать большую часть высоты */
   position: relative;
@@ -32,7 +31,7 @@ body {
     100vh - 100px
   ); /* Учитываем статус-бар и небольшой запас сверху/снизу */
   overflow: hidden; /* Чтобы содержимое не выходило за границы */
-  padding-bottom: 100px; /* Отступ снизу для input-container */
+  /* padding-bottom: 100px; /* Отступ снизу для input-container */
 }
 
 .status-bar {
@@ -46,9 +45,10 @@ body {
   font-size: 14px;
   z-index: 100;
   text-align: center;
+  height: 60px;
 }
 
-.main-button {
+/* .main-button {
   width: min(70vw, 300px);
   height: min(70vw, 300px);
   max-width: 300px;
@@ -62,16 +62,16 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  margin-top: 20px; /* Отступ сверху для кнопки */
-  margin-bottom: 20px; /* Отступ снизу для кнопки */
+  margin-top: 20px; 
+  margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  flex-shrink: 0; /* Не сжимать кнопку */
-}
+  flex-shrink: 0;
+} */
 
 .main-button:hover {
   transform: scale(1.05);
@@ -103,12 +103,6 @@ body {
   100% {
     box-shadow: 0 8px 32px rgba(255, 71, 87, 0.3), 0 0 0 0 rgba(255, 71, 87, 0);
   }
-}
-
-.button-text {
-  position: relative;
-  z-index: 2;
-  margin-bottom: 10px;
 }
 
 .visual-container {
@@ -294,6 +288,21 @@ body {
   }
 }
 
+#startDialog {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 40px;
+  height: 40px;
+  background: rgba(237, 234, 234, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  z-index: 9999;
+  cursor: pointer;
+}
+
 /* Адаптация под экран смартфона */
 @media (max-width: 480px) {
   .container {
@@ -308,10 +317,6 @@ body {
     height: min(80vw, 250px);
     margin-top: 15px;
     margin-bottom: 15px;
-  }
-
-  .button-text {
-    margin-bottom: 5px;
   }
 
   .visual-container {

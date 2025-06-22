@@ -29,6 +29,9 @@ async function sendUserDataToServer() {
       const result = await response.json();
       console.log("Пользователь авторизован:", result.user);
 
+      const passwdInput = document.getElementById("passwd");
+      passwdInput.style.display = "none";
+
       // Сохраняем токен для дальнейших запросов
       localStorage.setItem("authToken", result.token);
 

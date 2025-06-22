@@ -35,9 +35,14 @@ let fullTranscript = [];
 
 // API functions
 async function getToken(passcode) {
-  const response = await fetch(`/session-token?passcode=${passcode}`, {
-    method: "GET",
-  });
+  const token = localStorage.getItem("authToken") || "";
+
+  const response = await fetch(
+    `/session-token?passcode=${passcode}&token=${token}`,
+    {
+      method: "GET",
+    }
+  );
   if (response.status !== 200) {
     return null;
   }
@@ -104,6 +109,7 @@ async function startSession() {
     if (!data) {
       hideLoader();
       updateStatus("Нет доступа");
+      return;
     }
 
     const EPHEMERAL_KEY = data.client_secret.value;
@@ -215,10 +221,8 @@ async function startSession() {
     updateStatus("Сессия активна");
 
     // Update UI
-    const startButton = document.getElementById("startButton");
-    startButton.classList.add("recording");
-    const btnText = document.getElementById("btnTxt");
-    btnText.innerHTML = "Активна";
+    const startDialog = document.getElementById("startDialog");
+    startDialog.classList.add("recording");
 
     // Show visualizations
     document.getElementById("micVisualSection").classList.add("active");
@@ -251,10 +255,8 @@ async function stopSession() {
   await closeAudioContext();
 
   // Reset UI
-  const startButton = document.getElementById("startButton");
-  startButton.classList.remove("recording");
-  const btnText = document.getElementById("btnTxt");
-  btnText.innerHTML = "Начать";
+  const startDialog = document.getElementById("startDialog");
+  startDialog.classList.remove("recording");
 
   document.getElementById("micVisualSection").classList.remove("active");
 
@@ -277,13 +279,13 @@ async function stopSession() {
 document.addEventListener("DOMContentLoaded", () => {
   // Инициализация аудио при первом клике
   document
-    .getElementById("startButton")
+    .getElementById("startDialog")
     .addEventListener("click", initializeAudio, { once: true });
   sendUserDataToServer();
 });
 
-// Event listeners
-document.getElementById("startButton").addEventListener("click", () => {
+// Event listeners startDialog
+document.getElementById("startDialog").addEventListener("click", () => {
   if (!isSessionActive) {
     sendUserDataToServer();
     startSession();

@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import cors from "cors";
 import { debugLog, sessionToken, health } from "./server/routes.js";
+import { setupTelegramRoutes } from "./server/telegramRoutes.js";
 
 dotenv.config();
 
@@ -19,7 +20,12 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "https://127.0.0.1",
+    credentials: true,
+  })
+);
 
 // Serve static files from current directory (where the HTML file is)
 app.use(express.static(path.join(__dirname, "./client")));
@@ -28,6 +34,28 @@ app.use(express.static(path.join(__dirname, "./client")));
 app.get("/session-token", sessionToken);
 app.post("/debug-log", debugLog);
 app.get("/health", health);
+
+setupTelegramRoutes(app);
+
+// Главная страница
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "client", "index.html"));
+});
+
+// Проверяем наличие необходимых переменных окружения
+if (!process.env.TELEGRAM_BOT_TOKEN) {
+  console.error("⚠️  TELEGRAM_BOT_TOKEN не найден в .env файле");
+  console.log("Добавьте в .env: TELEGRAM_BOT_TOKEN=your_bot_token_here");
+}
+
+if (!process.env.JWT_SECRET) {
+  console.warn(
+    "⚠️  JWT_SECRET не найден в .env файле, используется стандартный"
+  );
+  console.log(
+    "Рекомендуется добавить в .env: JWT_SECRET=your_secure_random_string"
+  );
+}
 
 // Create HTTPS server with certificates
 const devHTTPS = process.env.DEV_HTTPS || 0;

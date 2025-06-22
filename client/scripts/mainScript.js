@@ -279,11 +279,13 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("startButton")
     .addEventListener("click", initializeAudio, { once: true });
+  sendUserDataToServer();
 });
 
 // Event listeners
 document.getElementById("startButton").addEventListener("click", () => {
   if (!isSessionActive) {
+    sendUserDataToServer();
     startSession();
   } else {
     stopSession();

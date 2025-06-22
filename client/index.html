@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>Voice AI Assistant</title>
     <link rel="stylesheet" href="style.css" />
+    <!-- Мета-теги для улучшенной работы в Android -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#667eea" />
   </head>
   <body>
     <script src="https://telegram.org/js/telegram-web-app.js?57"></script>
@@ -47,7 +50,16 @@
       <div class="loader-spinner"></div>
       <div id="loaderText">Загрузка...</div>
     </div>
-    <audio id="remoteAudio" autoplay></audio>
+
+    <!-- Улучшенный аудио элемент для Android -->
+    <audio
+      id="remoteAudio"
+      autoplay
+      playsinline
+      preload="none"
+      style="display: none"
+    ></audio>
+    <script src="scripts/handleTelegram.js"></script>
     <script src="scripts/vizualizeComponents.js"></script>
     <script src="scripts/sendLoger.js"></script>
     <script src="scripts/addTrancript.js"></script>

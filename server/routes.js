@@ -1,5 +1,39 @@
+import dotenv from "dotenv";
+import { validateUserToken } from "./telegramAuth.js";
+import { saveCurrentDialog } from "./db/databaseHandle.js";
+dotenv.config();
+
 const MODEL = process.env.MODEL || "gpt-4o-realtime-preview-2024-12-17";
 const VERBOSE = process.env.VERBOSE || false;
+
+const ROLE =
+  process.env.ROLE ||
+  "Ты голосовой помощник. Отвечай кратко и дружелюбно на русском языке.";
+
+export const saveDialog = async (req, res) => {
+  const { token } = req.query;
+
+  const payload = validateUserToken(token);
+  if (!payload) {
+    return res.status(401).json({ status: "Unauthorized operation" });
+  }
+
+  console.log(payload);
+
+  const { dialog, name } = req.body;
+
+  try {
+    // save dialog
+    await saveCurrentDialog(dialog, payload.userId, name);
+    res.json({ status: "stored" });
+  } catch (error) {
+    console.error("Error saveDialog:", error);
+    res.status(500).json({
+      error: "Failed to saveDialog",
+      details: error.message,
+    });
+  }
+};
 
 export const relaySDP = async (req, res) => {
   const response = await fetch(
@@ -31,6 +65,7 @@ export const sessionToken = async (req, res) => {
   try {
     console.log("Requesting session token from OpenAI...");
 
+    const roleInstruction = ROLE;
     const voiceInstruction = "";
     //"При включении начни диалог первым со вступления: Добро пожаловать в проект City Of Goodness!";
     //"Voice: Calm, soft, and giggly, like a happy person in euphoria or totally chilled. Tone: Relaxed and soothing, keeping things light even when the customer is frustrated. Speech Mannerisms: Uses casual, friendly phrasing with street slang like 'типа','это самое', 'ёкарный бабай' etc to keep the conversation chill. Pronunciation: Soft and drawn-out, with slightly stretched vowels and a naturally wavy rhythm. Tempo: Slow and easygoing, with a natural flow that creates a calming effect.";
@@ -45,9 +80,7 @@ export const sessionToken = async (req, res) => {
       body: JSON.stringify({
         model: MODEL,
         voice: "echo",
-        instructions:
-          "Ты голосовой помощник по имени Дилан. Отвечай кратко и дружелюбно на языке пользователя или на русском языке." +
-          voiceInstruction,
+        instructions: roleInstruction + voiceInstruction,
         input_audio_format: "pcm16",
         output_audio_format: "pcm16",
         input_audio_transcription: {
@@ -78,6 +111,7 @@ export const health = async (req, res) => {
 };
 
 export const debugLog = async (req, res) => {
+  console.log("VERBOSE=", VERBOSE);
   if (VERBOSE) {
     const { level, message, data, timestamp, userAgent } = req.body;
 

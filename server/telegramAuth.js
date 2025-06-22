@@ -104,3 +104,39 @@ export function generateUserToken(userData) {
 
   return `${encodedHeader}.${encodedPayload}.${signature}`;
 }
+
+/**
+ * Валидация JWT токена пользователя
+ * @param {string} token - токен пользователя
+ * @returns {object|null} - payload, если токен валиден, иначе null
+ */
+export function validateUserToken(token) {
+  const [encodedHeader, encodedPayload, signature] = token.split(".");
+  if (!encodedHeader || !encodedPayload || !signature) {
+    return null;
+  }
+
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.JWT_SECRET || "")
+    .update(`${encodedHeader}.${encodedPayload}`)
+    .digest("base64url");
+
+  if (signature !== expectedSignature) {
+    return null; // Подпись не совпадает — токен подделан
+  }
+
+  try {
+    const payload = JSON.parse(
+      Buffer.from(encodedPayload, "base64url").toString("utf-8")
+    );
+
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && now > payload.exp) {
+      return null; // Токен истёк
+    }
+
+    return payload; // Всё ок — возвращаем данные
+  } catch (err) {
+    return null; // Не удалось декодировать payload
+  }
+}

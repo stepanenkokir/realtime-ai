@@ -286,10 +286,11 @@ body {
   }
 }
 
-#startDialog {
+#startDialog,
+#mainMenu {
   position: fixed;
   top: 10px;
-  left: 10px;
+
   width: 40px;
   height: 40px;
   background: rgba(237, 234, 234, 0.8);
@@ -299,6 +300,13 @@ body {
   font-size: 16px;
   z-index: 9999;
   cursor: pointer;
+}
+
+#startDialog {
+  left: 10px;
+}
+#mainMenu {
+  right: 10px;
 }
 
 /* Адаптация под экран смартфона

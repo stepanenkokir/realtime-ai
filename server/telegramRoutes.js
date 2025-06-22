@@ -1,4 +1,5 @@
 // server/telegramRoutes.js
+import { saveUserToDatabase } from "./db/databaseHandle.js";
 import { verifyTelegramInitData, generateUserToken } from "./telegramAuth.js";
 
 export function setupTelegramRoutes(app) {
@@ -36,7 +37,7 @@ export function setupTelegramRoutes(app) {
       const token = generateUserToken(verifiedData);
 
       // Сохраняем пользователя в базе данных (если нужно)
-      // await saveUserToDatabase(verifiedData.user);
+      await saveUserToDatabase(verifiedData.user);
 
       res.json({
         success: true,

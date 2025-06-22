@@ -1,6 +1,7 @@
 let isSessionActive = false;
 let peerConnection = null;
 let micStream = null;
+let sessionId = `session-${Date.now()}`;
 
 // Инициализируем server logger
 const serverLogger = new ServerLogger();
@@ -132,8 +133,12 @@ async function startSession() {
 
     // Create peer connection
     peerConnection = new RTCPeerConnection();
+    sessionId = `session-${Date.now()}`;
 
-    fullTranscript = [];
+    if (fullTranscript.length > 0) {
+      fullTranscript = [];
+      renderTranscript(fullTranscript, sessionId);
+    }
 
     peerConnection.oniceconnectionstatechange = () => {
       const s = peerConnection.iceConnectionState;
@@ -184,13 +189,13 @@ async function startSession() {
       // Request
       if (rr.type === "conversation.item.input_audio_transcription.completed") {
         fullTranscript.push({ sender: "user", text: rr.transcript });
-        renderTranscript(fullTranscript);
+        renderTranscript(fullTranscript, sessionId);
       }
 
       // Response
       if (rr.type === "response.audio_transcript.done") {
         fullTranscript.push({ sender: "ai", text: rr.transcript });
-        renderTranscript(fullTranscript);
+        renderTranscript(fullTranscript, sessionId);
       }
     });
 
@@ -276,16 +281,16 @@ async function stopSession() {
 // Добавьте инициализацию при загрузке страницы
 document.addEventListener("DOMContentLoaded", () => {
   // Инициализация аудио при первом клике
+  sendUserDataToServer();
   document
     .getElementById("startDialog")
     .addEventListener("click", initializeAudio, { once: true });
-  sendUserDataToServer();
 });
 
 // Event listeners startDialog
 document.getElementById("startDialog").addEventListener("click", () => {
   if (!isSessionActive) {
-    sendUserDataToServer();
+    //  sendUserDataToServer();
     startSession();
   } else {
     stopSession();

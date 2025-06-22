@@ -6,7 +6,6 @@ async function sendUserDataToServer() {
   try {
     // Получаем initData от Telegram
     const initData = window.Telegram.WebApp.initData;
-
     if (!initData) {
       console.error("InitData не найдена");
       return;

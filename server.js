@@ -6,7 +6,13 @@ import https from "https";
 import dotenv from "dotenv";
 import fs from "fs";
 import cors from "cors";
-import { debugLog, sessionToken, health, relaySDP } from "./server/routes.js";
+import {
+  debugLog,
+  sessionToken,
+  health,
+  relaySDP,
+  saveDialog,
+} from "./server/routes.js";
 import { setupTelegramRoutes } from "./server/telegramRoutes.js";
 
 dotenv.config();
@@ -38,6 +44,7 @@ app.post("/debug-log", debugLog);
 app.get("/health", health);
 
 app.post("/relay-sdp", relaySDP);
+app.post("/saveDialog", saveDialog);
 
 setupTelegramRoutes(app);
 

@@ -16,7 +16,7 @@ class MobileDebugLogger {
     this.toggleButton.style.cssText = `
       position: fixed;
       top: 10px;
-      right: 10px;
+      right: 60px;
       width: 40px;
       height: 40px;
       background: rgba(255, 0, 0, 0.8);
@@ -58,7 +58,7 @@ class MobileDebugLogger {
     this.clearButton.style.cssText = `
       position: fixed;
       top: 10px;
-      right: 60px;
+      right: 120px;
       width: 40px;
       height: 40px;
       background: rgba(0, 0, 255, 0.8);

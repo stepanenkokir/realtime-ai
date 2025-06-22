@@ -98,7 +98,7 @@ export function generateUserToken(userData) {
   );
 
   const signature = crypto
-    .createHmac("sha256", process.env.JWT_SECRET || "your-jwt-secret")
+    .createHmac("sha256", process.env.JWT_SECRET || "")
     .update(`${encodedHeader}.${encodedPayload}`)
     .digest("base64url");
 

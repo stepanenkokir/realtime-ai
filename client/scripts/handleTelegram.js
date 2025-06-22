@@ -1,5 +1,3 @@
-// В вашем frontend коде (например, в main.js или app.js)
-
 // Инициализация Telegram Web App
 window.Telegram.WebApp.ready();
 
@@ -27,7 +25,7 @@ async function sendUserDataToServer() {
 
     if (response.ok) {
       const result = await response.json();
-      console.log("Пользователь авторизован:", result.user);
+      console.log("Пользователь авторизован:", JSON.stringify(result.user));
 
       const passwdInput = document.getElementById("passwd");
       passwdInput.style.display = "none";

@@ -1,13 +1,12 @@
 // server.js
 import express from "express";
-import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
 import https from "https";
 import dotenv from "dotenv";
 import fs from "fs";
 import cors from "cors";
-import { debugLog, sessionToken, health } from "./server/routes.js";
+import { debugLog, sessionToken, health, relaySDP } from "./server/routes.js";
 import { setupTelegramRoutes } from "./server/telegramRoutes.js";
 
 dotenv.config();
@@ -20,6 +19,9 @@ const app = express();
 
 // Middleware
 app.use(express.json());
+app.use(express.text({ type: "application/sdp" }));
+
+//CORS
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "https://127.0.0.1",
@@ -34,6 +36,8 @@ app.use(express.static(path.join(__dirname, "./client")));
 app.get("/session-token", sessionToken);
 app.post("/debug-log", debugLog);
 app.get("/health", health);
+
+app.post("/relay-sdp", relaySDP);
 
 setupTelegramRoutes(app);
 

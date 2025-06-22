@@ -1,3 +1,21 @@
+const MODEL = process.env.MODEL || "gpt-4o-realtime-preview-2024-12-17";
+const VERBOSE = process.env.VERBOSE || false;
+
+export const relaySDP = async (req, res) => {
+  const response = await fetch(
+    `https://api.openai.com/v1/realtime?model=${MODEL}`,
+    {
+      method: "POST",
+      body: req.body,
+      headers: {
+        Authorization: req.headers.authorization,
+        "Content-Type": "application/sdp",
+      },
+    }
+  );
+  res.send(await response.text());
+};
+
 export const sessionToken = async (req, res) => {
   const { passcode, token } = req.query;
 
@@ -25,7 +43,7 @@ export const sessionToken = async (req, res) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-realtime-preview-2024-12-17",
+        model: MODEL,
         voice: "echo",
         instructions:
           "Ты голосовой помощник по имени Дилан. Отвечай кратко и дружелюбно на языке пользователя или на русском языке." +
@@ -60,14 +78,16 @@ export const health = async (req, res) => {
 };
 
 export const debugLog = async (req, res) => {
-  const { level, message, data, timestamp, userAgent } = req.body;
+  if (VERBOSE) {
+    const { level, message, data, timestamp, userAgent } = req.body;
 
-  console.log(`[CLIENT-${level}] ${timestamp} - ${message}`);
-  if (data) {
-    console.log("Data:", JSON.stringify(data, null, 2));
+    console.log(`[CLIENT-${level}] ${timestamp} - ${message}`);
+    if (data) {
+      console.log("Data:", JSON.stringify(data, null, 2));
+    }
+    console.log("User Agent:", userAgent);
+    console.log("---");
   }
-  console.log("User Agent:", userAgent);
-  console.log("---");
 
   res.json({ status: "logged" });
 };

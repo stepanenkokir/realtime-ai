@@ -198,9 +198,7 @@ async function startSession() {
     const offer = await peerConnection.createOffer();
     await peerConnection.setLocalDescription(offer);
 
-    // Send to OpenAI
-    const baseUrl = "https://api.openai.com/v1/realtime";
-    const sdpResponse = await fetch(`${baseUrl}?model=${model}`, {
+    const sdpResponse = await fetch(`/relay-sdp?model=${model}`, {
       method: "POST",
       body: offer.sdp,
       headers: {

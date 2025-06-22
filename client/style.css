@@ -106,16 +106,14 @@ body {
 }
 
 .visual-container {
-  height: 80px;
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
   align-items: center;
-  width: 80%;
+  width: 20%;
   position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 60px;
   opacity: 1;
   transition: all 0.3s ease;
 }
@@ -303,12 +301,13 @@ body {
   cursor: pointer;
 }
 
-/* Адаптация под экран смартфона */
+/* Адаптация под экран смартфона
+/*
 @media (max-width: 480px) {
   .container {
     padding: 15px;
-    height: calc(100vh - 60px); /* Учитываем статус-бар и input-container */
-    padding-bottom: 60px; /* Отступ снизу для input-container */
+    height: calc(100vh - 60px); 
+    padding-bottom: 60px; 
   }
 
   .main-button {
@@ -317,11 +316,6 @@ body {
     height: min(80vw, 250px);
     margin-top: 15px;
     margin-bottom: 15px;
-  }
-
-  .visual-container {
-    height: 60px;
-    bottom: 15px;
   }
 
   .visual-section {
@@ -342,9 +336,9 @@ body {
   }
 
   .input-container {
-    width: calc(100% - 30px); /* Учитываем padding container'а на мобильных */
+    width: calc(100% - 30px);
     bottom: 15px;
-    max-width: unset; /* Отключаем max-width для мобильных */
+    max-width: unset;
   }
 
   #textInput,
@@ -357,4 +351,4 @@ body {
     padding: 8px 15px;
     font-size: 12px;
   }
-}
+} */

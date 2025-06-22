@@ -154,24 +154,30 @@ async function startSession() {
         const audioElement = document.getElementById("remoteAudio");
         audioElement.srcObject = e.streams[0];
         audioElement.autoplay = true;
-        // Для Android в Telegram Mini App
-        if (window.Telegram?.WebApp?.platform === "android") {
-          // Явно устанавливаем свойства для Android
-          audioElement.autoplay = true;
-          audioElement.muted = false;
-          audioElement.controls = false;
+        audioElement.muted = false;
+        audioElement.controls = false;
 
-          // Попытка воспроизведения с задержкой
-          setTimeout(() => {
-            audioElement.play().catch((err) => {
-              console.log("Autoplay failed, trying manual play:", err);
-              // Показать пользователю кнопку для включения звука
-              showAudioEnableButton();
-            });
-          }, 100);
-        } else {
-          audioElement.autoplay = true;
-        }
+        // // Для Android в Telegram Mini App
+        // if (window.Telegram?.WebApp?.platform === "android") {
+        //   // Явно устанавливаем свойства для Android
+        //   console.log("Set audio for Android");
+        //   audioElement.autoplay = true;
+        //   audioElement.muted = false;
+        //   audioElement.controls = false;
+
+        //   // Попытка воспроизведения с задержкой
+        //   setTimeout(() => {
+        //     audioElement.play().catch((err) => {
+        //       console.log("Autoplay failed, trying manual play:", err);
+        //       // Показать пользователю кнопку для включения звука
+        //       showAudioEnableButton();
+        //     });
+        //   }, 100);
+        // } else {
+        //   audioElement.autoplay = true;
+        //   audioElement.muted = false;
+        //   audioElement.controls = false;
+        // }
       }
     };
 
